@@ -1,6 +1,6 @@
-Yii2 Setting
+Yii2 Auth
 =========
-Yii2 Setting for other application, especially for [Yii2 Adminlte](https://github.com/funson86/yii2-adminlte)
+Yii2 Auth could manage operations in category, you could integrate it to [Yii2 Adminlte](https://github.com/funson86/yii2-adminlte)
 
 Installation
 ------------
@@ -10,13 +10,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require funson86/yii2-setting "dev-master"
+php composer.phar require funson86/yii2-auth "dev-master"
 ```
 
 or add
 
 ```
-"funson86/yii2-setting": "*"
+"funson86/yii2-auth": "*"
 ```
 
 to the require section of your `composer.json` file.
@@ -32,14 +32,57 @@ Once the extension is installed, simply use it in your code by  :
 Migration run
 
 ```php
-yii migrate --migrationPath=@funson86/setting/migrations
+yii migrate --migrationPath=@funson86/auth/migrations
 ```
 
-### Config /common/config/main.php to use Yii::$app->setting
+Or insert to table `setting` manually.
+```php
+CREATE TABLE `auth_operation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `parent_id` (`parent_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Auth Operation';
+
+CREATE TABLE `auth_role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `operation_list` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Auth Role';
+
+INSERT INTO `auth_role` VALUES ('1', 'Super Admin', '', 'all');
+INSERT INTO `auth_role` VALUES ('3', 'Normal Admin', '', 'backendLogin;viewUser;viewRole');
+
+INSERT INTO `auth_operation` VALUES ('111', '0', 'basic');
+INSERT INTO `auth_operation` VALUES ('113', '0', 'user');
+INSERT INTO `auth_operation` VALUES ('114', '0', 'role');
+INSERT INTO `auth_operation` VALUES ('11101', '111', 'backendLogin');
+INSERT INTO `auth_operation` VALUES ('11302', '113', 'viewUser');
+INSERT INTO `auth_operation` VALUES ('11303', '113', 'createUser');
+INSERT INTO `auth_operation` VALUES ('11304', '113', 'updateUser');
+INSERT INTO `auth_operation` VALUES ('11305', '113', 'deleteUser');
+INSERT INTO `auth_operation` VALUES ('11402', '114', 'viewRole');
+INSERT INTO `auth_operation` VALUES ('11403', '114', 'createRole');
+INSERT INTO `auth_operation` VALUES ('11404', '114', 'updateRole');
+INSERT INTO `auth_operation` VALUES ('11405', '114', 'deleteRole');
+
+ALTER TABLE `user` ADD COLUMN `auth_role` int(11) AFTER `status`;
+UPDATE `user` set `auth_role`=3;
+UPDATE `user` set `auth_role`=1 where `username` = 'admin';
+```
+
+### Config /common/config/main.php to use Yii::$app->auth
+After add the following code, the code
+*if(!Yii::$app->user->can('createRole')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));*
+in each action of controller could check whether current user have the authority to run this action or not.
 ```php
     'components' => [
-        'setting' => [
-            'class' => 'funson86\setting\Setting',
+        'user' => [
+            'class' => 'funson86\auth\User',
+            'enableAutoLogin' => true,
         ],
     ],
 ```
@@ -48,44 +91,39 @@ yii migrate --migrationPath=@funson86/setting/migrations
 
 ```php
     'modules' => [
-        'setting' => [
-            'class' => 'funson86\setting\Module',
-            'controllerNamespace' => 'funson86\setting\controllers'
+        'auth' => [
+            'class' => 'funson86\auth\Module',
         ],
     ],
 ```
 
 
-### Config at backend
-backend : http://you-domain/backend/web/setting
+### CRUD role with operations at backend
+backend : http://you-domain/backend/web/auth
 
-### Add Your Setting
+### Add Your Auth Operation
 Setting support 3 type of setting: text, password, select.
-You could add your setting by migration or insert to table `setting` manually.
+You could add your setting by migration or insert to table `auth_operation` manually.
 ```php
-INSERT INTO `setting` (`id`, `parent_id`, `code`, `type`, `store_range`, `store_dir`, `value`, `sort_order`) VALUES
-(11, 0, 'info', 'group', '', '', '', '50'),
-(21, 0, 'basic', 'group', '', '', '', '50'),
-(31, 0, 'smtp', 'group', '', '', '', '50'),
-(1111, 11, 'siteName', 'text', '', '', 'Your Site', '50'),
-(1112, 11, 'siteTitle', 'text', '', '', 'Your Site Title', '50'),
-(1113, 11, 'siteKeyword', 'text', '', '', 'Your Site Keyword', '50'),
-(2111, 21, 'timezone', 'select', '-12,-11,-10,-9,-8,-7,-6,-5,-4,-3.5,-3,-2,-1,0,1,2,3,3.5,4,4.5,5,5.5,5.75,6,6.5,7,8,9,9.5,10,11,12', '', '8', '50'),
-(2112, 21, 'commentCheck', 'select', '0,1', '', '1', '50'),
-(3111, 31, 'smtpHost', 'text', '', '', 'localhost', '50'),
-(3112, 31, 'smtpPort', 'text', '', '', '', '50'),
-(3113, 31, 'smtpUser', 'text', '', '', '', '50'),
-(3114, 31, 'smtpPassword', 'password', '', '', '', '50'),
-(3115, 31, 'smtpMail', 'text', '', '', '', '50');
+INSERT INTO `auth_operation` VALUES ('115', '0', 'Service');
+INSERT INTO `auth_operation` VALUES ('11501', '115', 'viewService');
 ```
 
 ### Use Your Setting
-Once you set the value at the backend. Simply access your setting by the following code:
-
+Once you add new operation in `auth_operation`, add
+`if(!Yii::$app->user->can('viewService')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'))`
+at the beginning of action of controller like the following:
 ```php
-echo Yii::$app->setting->get('siteName');
+class ServiceController extends Controller
+{
+    public function actionView($id)
+    {
+        if(!Yii::$app->user->can('viewService')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));
+        // you business code
+    }
+}
 ```
 
 Preview:
 -------
-![Yii2-Setting](yii2-setting-preview.png)
+![Yii2-Auth](yii2-auth-preview.png)
