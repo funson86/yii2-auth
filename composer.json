@@ -2,7 +2,7 @@
     "name": "funson86/yii2-auth-role",
     "description": "Yii2 Auth Role with Category",
     "type": "yii2-extension",
-    "keywords": ["yii2","extension","setting"],
+    "keywords": ["yii2","extension","auth","role","rbac"],
     "license": "Apache-2.0",
     "authors": [
         {
