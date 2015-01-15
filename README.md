@@ -74,7 +74,7 @@ UPDATE `user` set `auth_role`=3;
 UPDATE `user` set `auth_role`=1 where `username` = 'admin';
 ```
 
-### Config /common/config/main.php to use Yii::$app->auth
+### Config /common/config/main.php to check authority
 After add the following code, the code
 *if(!Yii::$app->user->can('createRole')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));*
 in each action of controller could check whether current user have the authority to run this action or not.
@@ -87,7 +87,8 @@ in each action of controller could check whether current user have the authority
     ],
 ```
 
-### Config backend modules in backend/config/main.php to manage settings
+### CRUD Auth Role with operation at backend
+Config backend modules in backend/config/main.php to manage settings
 
 ```php
     'modules' => [
@@ -96,10 +97,7 @@ in each action of controller could check whether current user have the authority
         ],
     ],
 ```
-
-
-### CRUD role with operations at backend
-backend : http://you-domain/backend/web/auth
+Access backend url: http://you-domain/backend/web/auth
 
 ### Add Your Auth Operation
 You could add your new operation based on business by migration or insert to table `auth_operation` manually.
