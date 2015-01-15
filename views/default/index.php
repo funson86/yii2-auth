@@ -26,19 +26,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'id',
-            [
-                'attribute'=>'company_id',
-                'value'=>function ($model) {
-                        return $model->company->name;
-                    },
-                'filter' => Html::activeDropDownList(
-                        $searchModel,
-                        'company_id',
-                        ArrayHelper::map(\common\models\Company::find()->all(), 'id', 'name'),
-                        ['class' => 'form-control', 'prompt' => Yii::t('app', 'Please Filter')]
-                    ),
-                'visible' => (Yii::$app->user->identity->company_id == 1),
-            ],
             'name',
             'description',
             //'operation_list:ntext',

@@ -28,9 +28,8 @@ class m141208_201489_auth_init extends Migration
             '{{%auth_operation}}',
             [
                 'id' => Schema::TYPE_PK,
-                'name' => Schema::TYPE_STRING . '(64) NOT NULL',
-                'description' => Schema::TYPE_STRING . '(255) DEFAULT NULL',
-                'operation_list' => Schema::TYPE_TEXT . '',
+                'parent_id' => Schema::TYPE_INTEGER . ' NOT NULL DEFAULT 0',
+                'name' => Schema::TYPE_STRING . '(32) DEFAULT NULL',
             ],
             $tableOptions
         );
@@ -40,18 +39,20 @@ class m141208_201489_auth_init extends Migration
             '{{%auth_role}}',
             [
                 'id' => Schema::TYPE_PK,
-                'parent_id' => Schema::TYPE_INTEGER . ' NOT NULL DEFAULT 0',
-                'name' => Schema::TYPE_STRING . '(32) DEFAULT NULL',
+                'name' => Schema::TYPE_STRING . '(64) NOT NULL',
+                'description' => Schema::TYPE_STRING . '(255) DEFAULT NULL',
+                'operation_list' => Schema::TYPE_TEXT . '',
             ],
             $tableOptions
         );
 
         // Indexes
-        $this->createIndex('parent_id', '{{%auth_role}}', 'parent_id');
+        $this->createIndex('parent_id', '{{%auth_operation}}', 'parent_id');
 
         // Add default setting
         $this->execute($this->getOperationSql());
         $this->execute($this->getRoleSql());
+        $this->execute($this->getUserSql());
     }
 
     /**
@@ -59,7 +60,7 @@ class m141208_201489_auth_init extends Migration
      */
     private function getOperationSql()
     {
-        return "INSERT INTO {{%auth_operation}} (`id`, `name`, `description`, `operation_list`) VALUES
+        return "INSERT INTO {{%auth_operation}} (`id`, `parent_id`, `name`) VALUES
                 ('111', '0', 'basic'),
                 ('113', '0', 'user'),
                 ('114', '0', 'role'),
@@ -80,9 +81,20 @@ class m141208_201489_auth_init extends Migration
      */
     private function getRoleSql()
     {
-        return "INSERT INTO {{%auth_role}} (`id`, `parent_id`, `name`) VALUES
+        return "INSERT INTO {{%auth_role}} (`id`, `name`, `description`, `operation_list`) VALUES
                 ('1', 'Super Admin', '', 'all'),
                 ('3', 'Normal Admin', '', 'backendLogin;viewUser;viewRole')
+                ";
+    }
+
+    /**
+     * @return string SQL to insert first user
+     */
+    private function getUserSql()
+    {
+        return "ALTER TABLE {{%user}} ADD COLUMN `auth_role` int(11) AFTER `email`;
+                UPDATE {{%user}} set `auth_role` = 3;
+                UPDATE {{%user}} set `auth_role` = 1 where `username` = 'admin';
                 ";
     }
 
@@ -91,6 +103,7 @@ class m141208_201489_auth_init extends Migration
      */
     public function down()
     {
+        $this->execute("ALTER TABLE {{%user}} DROP COLUMN `auth_role`");
         $this->dropTable('{{%auth_role}}');
         $this->dropTable('{{%auth_operation}}');
     }

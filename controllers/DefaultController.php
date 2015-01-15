@@ -2,10 +2,10 @@
 
 namespace funson86\auth\controllers;
 
-use funson86\auth\models\Setting;
 use Yii;
-use common\models\AuthRole;
-use common\models\AuthRoleSearch;
+use funson86\auth\models\AuthRole;
+use funson86\auth\models\AuthRoleSearch;
+use funson86\auth\models\AuthOperation;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -45,13 +45,7 @@ class DefaultController extends Controller
         if(!Yii::$app->user->can('viewRole')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));
 
         $searchModel = new AuthRoleSearch();
-        if(Yii::$app->user->identity->company_id == Company::COMPANY_SYSTEM)
-            $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        else {
-            $queryParams = Yii::$app->request->queryParams;
-            $queryParams['AuthRoleSearch']['company_id'] = Yii::$app->user->identity->company_id;
-            $dataProvider = $searchModel->search($queryParams);
-        }
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -77,7 +71,7 @@ class DefaultController extends Controller
             $arrayOperation = explode(';', $model->operation_list);
             foreach($arrayOperation as $item)
             {
-                $strOperation .= Yii::t('auth', $item) . ' ';
+                $strOperation .= Yii::t('auth', $item) . ' | ';
                 $i++;
                 if($i % 5 == 0)
                     $strOperation .= "\n";
@@ -121,17 +115,6 @@ class DefaultController extends Controller
                 $operations[$subOperation->parent_id]['sub'][$subOperation->name] = Yii::t('auth', $subOperation->name);
             }
 
-            if (Yii::$app->user->identity->company_id != Company::COMPANY_SYSTEM) {
-                $userOperations = ';' . AuthRole::findOne(Yii::$app->user->identity->auth_role)->operation_list . ';';
-                foreach ($operations as $key => $subOperations) {
-                    foreach ($subOperations['sub'] as $name => $label) {
-                        if (strpos($userOperations, ';' . $name . ';') === false) {
-                            unset($operations[$key]['sub'][$name]);
-                        }
-                    }
-                }
-            }
-
             return $this->render('create', [
                 'model' => $model,
                 'operations' => $operations,
@@ -169,17 +152,6 @@ class DefaultController extends Controller
             foreach($subOperations as $subOperation)
             {
                 $operations[$subOperation->parent_id]['sub'][$subOperation->name] = Yii::t('auth', $subOperation->name);
-            }
-
-            if (Yii::$app->user->identity->company_id != Company::COMPANY_SYSTEM) {
-                $userOperations = ';' . AuthRole::findOne(Yii::$app->user->identity->auth_role)->operation_list . ';';
-                foreach ($operations as $key => $subOperations) {
-                    foreach ($subOperations['sub'] as $name => $label) {
-                        if (strpos($userOperations, ';' . $name . ';') === false) {
-                            unset($operations[$key]['sub'][$name]);
-                        }
-                    }
-                }
             }
 
             //generate selected operations

@@ -27,11 +27,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            [
-                'attribute' => 'company_id',
-                'value' => $model->company->name,
-                'visible' => (Yii::$app->user->identity->company_id == 1),
-            ],
             'name',
             'description',
             [
