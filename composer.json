@@ -1,6 +1,6 @@
 {
-    "name": "funson86/yii2-auth-role",
-    "description": "Yii2 Auth Role with Category",
+    "name": "funson86/yii2-auth",
+    "description": "Yii2 Auth with Operation Category",
     "type": "yii2-extension",
     "keywords": ["yii2","extension","auth","role","rbac"],
     "license": "Apache-2.0",
@@ -15,10 +15,10 @@
     },
     "autoload": {
         "psr-4": {
-            "funson86\\setting\\": ""
+            "funson86\\auth\\": ""
         }
     },
     "extra": {
-        "bootstrap": "funson86\\setting\\Bootstrap"
+        "bootstrap": "funson86\\auth\\Bootstrap"
     }
 }
