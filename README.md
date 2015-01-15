@@ -102,14 +102,13 @@ in each action of controller could check whether current user have the authority
 backend : http://you-domain/backend/web/auth
 
 ### Add Your Auth Operation
-Setting support 3 type of setting: text, password, select.
-You could add your setting by migration or insert to table `auth_operation` manually.
+You could add your new operation based on business by migration or insert to table `auth_operation` manually.
 ```php
 INSERT INTO `auth_operation` VALUES ('115', '0', 'Service');
 INSERT INTO `auth_operation` VALUES ('11501', '115', 'viewService');
 ```
 
-### Use Your Setting
+### Use Your Operation Check
 Once you add new operation in `auth_operation`, add
 `if(!Yii::$app->user->can('viewService')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'))`
 at the beginning of action of controller like the following:
@@ -124,6 +123,15 @@ class ServiceController extends Controller
 }
 ```
 
-Preview:
+### Translation
+If no translation, it will show you 'viewService' at the backend management. You could add the translation
+in backend/messages/en/auth.php or backend/messages/zh-CN/auth.php. Like the following:
+```php
+return [
+    'viewService' => 'View Service',
+];
+```
+
+Preview
 -------
 ![Yii2-Auth](yii2-auth-preview.png)
