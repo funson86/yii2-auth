@@ -131,6 +131,7 @@ class DefaultController extends Controller
     public function actionUpdate($id)
     {
         if(!Yii::$app->user->can('updateRole')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));
+        if($id == 1) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));
 
         $model = $this->findModel($id);
 
@@ -173,6 +174,7 @@ class DefaultController extends Controller
     public function actionDelete($id)
     {
         if(!Yii::$app->user->can('deleteRole')) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));
+        if(1 == $id) throw new ForbiddenHttpException(Yii::t('app', 'No Auth'));
 
         $this->findModel($id)->delete();
 
