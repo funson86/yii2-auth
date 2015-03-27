@@ -37,11 +37,11 @@ class User extends \yii\web\User
         } else {
             $operations = AuthRole::findOne(Yii::$app->user->identity->auth_role)->operation_list;
             $this->_operations = $operations;
-
-            //super admin
-            if ($operations == 'all')
-                return true;
         }
+
+        //super admin
+        if ($operations == 'all')
+            return true;
 
         if (strpos(';' . $operations . ';', $permissionName) === false)
             return false;
