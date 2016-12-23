@@ -19,7 +19,7 @@ class AuthOperation extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'auth_operation';
+        return '{{%auth_operation}}';
     }
 
     /**
