@@ -29,7 +29,7 @@ class AuthRole extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'auth_role';
+        return '{{%auth_role}}';
     }
 
     /**
