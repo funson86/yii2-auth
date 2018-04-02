@@ -32,6 +32,10 @@ class User extends \yii\web\User
      */
     public function can($permissionName, $params = [], $allowCaching = true)
     {
+        if (Yii::$app->user->getIsGuest()) {
+            return false;
+        }
+
         if ($allowCaching && isset($this->_operations)) {
            $operations =  $this->_operations;
         } else {
